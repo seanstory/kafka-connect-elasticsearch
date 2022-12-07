@@ -178,6 +178,12 @@ public class ElasticsearchSinkConnectorConfig extends AbstractConfig {
   private static final String READ_TIMEOUT_MS_DISPLAY = "Read Timeout";
   private static final int READ_TIMEOUT_MS_DEFAULT = (int) TimeUnit.SECONDS.toMillis(3);
 
+  public static final String REQUEST_PIPELINE_CONFIG = "request.pipeline";
+  private static final String REQUEST_PIPELINE_CONFIG_DOC = "The Elastic Ingest Pipeline "
+      + "to utilize in the indexing requests.";
+  private static final String REQUEST_PIPELINE_DISPLAY = "Request Pipeline";
+  private static final String REQUEST_PIPELINE_DEFAULT = null;
+
   // Data Conversion configs
   public static final String IGNORE_KEY_TOPICS_CONFIG = "topic.key.ignore";
   public static final String IGNORE_SCHEMA_TOPICS_CONFIG = "topic.schema.ignore";
@@ -583,6 +589,16 @@ public class ElasticsearchSinkConnectorConfig extends AbstractConfig {
             ++order,
             Width.SHORT,
             READ_TIMEOUT_MS_DISPLAY
+        ).define(
+            REQUEST_PIPELINE_CONFIG,
+            Type.STRING,
+            REQUEST_PIPELINE_DEFAULT,
+            Importance.LOW,
+            REQUEST_PIPELINE_CONFIG_DOC,
+            CONNECTOR_GROUP,
+            ++order,
+            Width.SHORT,
+            REQUEST_PIPELINE_DISPLAY
     );
   }
 
@@ -898,6 +914,10 @@ public class ElasticsearchSinkConnectorConfig extends AbstractConfig {
     return getList(CONNECTION_URL_CONFIG)
         .stream().map(s -> s.endsWith("/") ? s.substring(0, s.length() - 1) : s)
         .collect(Collectors.toCollection(HashSet::new));
+  }
+
+  public String requestPipeline() {
+    return getString(REQUEST_PIPELINE_CONFIG);
   }
 
   public boolean dropInvalidMessage() {
