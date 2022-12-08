@@ -154,7 +154,7 @@ public class ElasticsearchClient {
 
     this.client = clientBuilder.build();
 
-    this.bulkProcessor = BulkProcessor
+    BulkProcessor.Builder bulkProcessorBuilder = BulkProcessor
         .builder(buildConsumer(), buildListener(afterBulkCallback))
         .setBulkActions(config.batchSize())
         .setBulkSize(config.bulkSize())
@@ -163,8 +163,13 @@ public class ElasticsearchClient {
         // Disabling bulk processor retries, because they only cover a small subset of errors
         // (see https://github.com/elastic/elasticsearch/issues/71159)
         // We are doing retries in the async thread instead.
-        .setBackoffPolicy(BackoffPolicy.noBackoff())
-        .build();
+        .setBackoffPolicy(BackoffPolicy.noBackoff());
+
+    if (config.requestPipeline() != null) {
+      bulkProcessorBuilder.setGlobalPipeline(config.requestPipeline());
+    }
+
+    this.bulkProcessor = bulkProcessorBuilder.build();
   }
 
   /**
